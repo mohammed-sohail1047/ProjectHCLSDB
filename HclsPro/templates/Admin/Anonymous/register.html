@@ -38,14 +38,25 @@
 
                             <div class="mb-3">
                                 <label for="phone" class="form-label">Phone (optional)</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ request.POST.phone|default:'' }}" inputmode="tel" placeholder="+1 555 555 5555">
+                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ request.POST.phone|default:'' }}" inputmode="tel" placeholder="+91 555 555 5555">
+                            </div>
+
+                            <!-- Hidden field: MAdmin is the only option for registration -->
+                            <input type="hidden" name="admin_type" value="1">
+                            
+                            <div class="mb-3">
+                                <div class="alert alert-info" role="alert">
+                                    <strong>ℹ️ Account Type:</strong> You are registering as a <strong>Managerial Admin</strong>. Once activated, you can add Operational Admins from your admin dashboard.
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="password" name="password" required aria-describedby="pwdHelp">
-                                    <button type="button" class="btn btn-outline-secondary" id="togglePwd">Show</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePwd" aria-label="Show password" style="border: 1px solid #dee2e6;">
+                                        <img src="{% static 'images/eye-solid.png' %}" alt="Show password" id="passwordToggle" width="20px" height="20px">
+                                    </button>
                                 </div>
                                 <div id="pwdHelp" class="form-text">Minimum 8 characters. Use letters, numbers, and symbols for a stronger password.</div>
                                 <div class="progress mt-2" style="height:8px;"><div id="pwdStrength" class="progress-bar" role="progressbar" style="width:0%"></div></div>
@@ -53,7 +64,12 @@
 
                             <div class="mb-3">
                                 <label for="confirm_password" class="form-label">Confirm password</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                    <button type="button" class="btn btn-outline-secondary" id="toggleConfirmPwd" aria-label="Show password" style="border: 1px solid #dee2e6;">
+                                        <img src="{% static 'images/eye-solid.png' %}" alt="Show password" id="confirmPasswordToggle" width="20px" height="20px">
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="mb-3 form-check">
@@ -77,8 +93,9 @@
         (function(){
             const pwd = document.getElementById('password');
             const toggle = document.getElementById('togglePwd');
-            const strength = document.getElementById('pwdStrength');
             const confirm = document.getElementById('confirm_password');
+            const toggleConfirm = document.getElementById('toggleConfirmPwd');
+            const strength = document.getElementById('pwdStrength');
             const form = document.getElementById('registerForm');
             const btn = document.getElementById('registerBtn');
 
@@ -92,9 +109,38 @@
                 return Math.min(score,100);
             }
 
-            if (toggle && pwd) toggle.addEventListener('click', ()=>{
+            if (toggle && pwd) toggle.addEventListener('click', (e)=>{
+                e.preventDefault();
                 const t = pwd.getAttribute('type') === 'password' ? 'text' : 'password';
-                pwd.setAttribute('type', t); toggle.textContent = t === 'password' ? 'Show' : 'Hide';
+                pwd.setAttribute('type', t);
+                
+                const toggleImg = document.getElementById('passwordToggle');
+                if (t === 'password') {
+                    toggleImg.src = "{% static 'images/eye-solid.png' %}";
+                    toggleImg.alt = "Show password";
+                    toggle.setAttribute('aria-label', 'Show password');
+                } else {
+                    toggleImg.src = "{% static 'images/eye-slash-solid.png' %}";
+                    toggleImg.alt = "Hide password";
+                    toggle.setAttribute('aria-label', 'Hide password');
+                }
+            });
+
+            if (toggleConfirm && confirm) toggleConfirm.addEventListener('click', (e)=>{
+                e.preventDefault();
+                const t = confirm.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirm.setAttribute('type', t);
+                
+                const toggleImg = document.getElementById('confirmPasswordToggle');
+                if (t === 'password') {
+                    toggleImg.src = "{% static 'images/eye-solid.png' %}";
+                    toggleImg.alt = "Show password";
+                    toggleConfirm.setAttribute('aria-label', 'Show password');
+                } else {
+                    toggleImg.src = "{% static 'images/eye-slash-solid.png' %}";
+                    toggleImg.alt = "Hide password";
+                    toggleConfirm.setAttribute('aria-label', 'Hide password');
+                }
             });
 
             if (pwd && strength) pwd.addEventListener('input', ()=>{

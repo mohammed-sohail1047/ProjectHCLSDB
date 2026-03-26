@@ -1,8 +1,100 @@
 {% extends 'Admin/MAdmin/mabase.html' %}
+{% load static %}
 
 {% block content %}
 
-<div class="container py-3">
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-md-8">
+			<!-- Profile Card -->
+			<div class="card shadow-sm">
+				<div class="card-header bg-primary text-white">
+					<h4 class="mb-0">👤 My Profile</h4>
+				</div>
+				<div class="card-body p-5">
+					{% if admin %}
+						<!-- Admin Information -->
+						<div class="mb-4">
+							<h5 class="mb-4">Profile Information</h5>
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label class="form-label text-muted"><strong>Email:</strong></label>
+									<p class="h6">{{ admin.email }}</p>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label text-muted"><strong>Username:</strong></label>
+									<p class="h6">{{ admin.username }}</p>
+								</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label class="form-label text-muted"><strong>Phone:</strong></label>
+									<p class="h6">{{ admin.phone|default:"Not provided" }}</p>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label text-muted"><strong>Admin Type:</strong></label>
+									<p class="h6"><span class="badge bg-primary">Managerial Admin (MAdmin)</span></p>
+								</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label class="form-label text-muted"><strong>Account Status:</strong></label>
+									<p class="h6">
+										{% if admin.status %}
+											<span class="badge bg-success">✓ Active</span>
+										{% else %}
+											<span class="badge bg-warning">⏳ Pending Activation</span>
+										{% endif %}
+									</p>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label text-muted"><strong>Account ID:</strong></label>
+									<p class="h6">{{ admin.id }}</p>
+								</div>
+							</div>
+						</div>
+
+						<hr>
+
+						<!-- Admin Permissions -->
+						<div class="mb-4">
+							<h5 class="mb-3">Your Permissions</h5>
+							<ul class="list-unstyled">
+								<li class="mb-2"><i class="fas fa-check-circle text-success"></i> View Dashboard</li>
+								<li class="mb-2"><i class="fas fa-check-circle text-success"></i> Add Operational Admins</li>
+								<li class="mb-2"><i class="fas fa-check-circle text-success"></i> Manage Staff</li>
+								<li class="mb-2"><i class="fas fa-check-circle text-success"></i> View Reports</li>
+							</ul>
+						</div>
+
+						<hr>
+
+						<!-- Action Buttons -->
+						<div class="mt-4 d-flex gap-2">
+							<a href="{% url 'dashboard' %}" class="btn btn-primary">
+								<i class="fas fa-arrow-left"></i> Back to Dashboard
+							</a>
+							<a href="{% url 'add' %}" class="btn btn-success">
+								<i class="fas fa-plus"></i> Add Operational Admin
+							</a>
+							<a href="{% url 'logout' %}" class="btn btn-danger">
+								<i class="fas fa-sign-out-alt"></i> Logout
+							</a>
+						</div>
+					{% else %}
+						<div class="alert alert-warning" role="alert">
+							Profile information not found. Please <a href="{% url 'login' %}">login again</a>.
+						</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
 	<div class="row">
 		<div class="col-md-4">
 			<div class="card mb-3 text-center">

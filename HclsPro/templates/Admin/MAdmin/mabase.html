@@ -16,9 +16,9 @@
             <h2 class="text-white text-center">HCLSDB Managerial Admin</h2>
             <hr>
             <p><a href="{% url 'dashboard' %}">Dashboard</a></p>
-            <p><a href="{% url 'profile' %}">Admin Profiles</a></p>
-            <p><a href="{% url 'manage' %}">Manage Admin</a></p>
+            <p><a href="{% url 'profile' %}">Profile</a></p>
             <p><a href="{% url 'add' %}">Add Admin</a></p>
+            <p><a href="{% url 'manage' %}">Manage Admin</a></p>
         </td>
 
         <!-- RIGHT SIDE -->
@@ -51,7 +51,7 @@
                                             <div class="small text-muted">Local time</div>
                                         </div>
 
-                                        <form method="post" action="#">
+                                        <form method="post" action="{% url 'logout' %}" >
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-danger" style="padding-left: 20px;">Logout</button>
                                         </form>

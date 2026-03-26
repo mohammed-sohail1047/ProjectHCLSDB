@@ -1,106 +1,279 @@
 {% extends 'Admin/MAdmin/mabase.html' %}
+{% load static %}
 
 {% block content %}
 
-<div class="container py-3">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <strong>Add New Record</strong>
-                    <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary">Back</a>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" id="addForm" novalidate>
-                        {% csrf_token %}
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Full name</label>
-                                <input type="text" name="name" class="form-control" required>
-                                <div class="invalid-feedback">Please provide a name.</div>
-                            </div>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">➕ Add New Personnel</h2>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" autocomplete="email" required>
-                                <div class="invalid-feedback">Please provide a valid email.</div>
-                            </div>
+    <!-- Tab Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="nav nav-tabs border-bottom" role="tablist">
+                <button class="nav-link active" id="admin-tab" data-bs-toggle="tab" data-bs-target="#adminPanel" type="button" role="tab">
+                    <i class="fas fa-user-shield"></i> Add Operational Admin
+                </button>
+                <button class="nav-link" id="staff-tab" data-bs-toggle="tab" data-bs-target="#staffPanel" type="button" role="tab">
+                    <i class="fas fa-users"></i> Add Staff / Personnel
+                </button>
+            </div>
+        </div>
+    </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label">Phone</label>
-                                <input type="tel" name="phone" class="form-control" placeholder="(+91) 123-456-7890">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label">Date of birth</label>
-                                <input type="date" name="dob" class="form-control">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label">Role</label>
-                                <select name="role" id="roleSelect" class="form-select" required>
-                                    <option value="">Choose...</option>
-                                    <option value="patient">Patient</option>
-                                    <option value="doctor">Doctor</option>
-                                    <option value="staff">Staff</option>
-                                </select>
-                                <div class="invalid-feedback">Select a role.</div>
-                            </div>
-
-                            <div class="col-12" id="doctorFields" style="display:none;">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Specialty</label>
-                                        <input type="text" name="specialty" class="form-control">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">License No.</label>
-                                        <input type="text" name="license" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Profile Photo</label>
-                                <input type="file" name="photo" id="photoInput" accept="image/*" class="form-control">
-                                <div class="form-text">Optional. Max 2MB.</div>
-                            </div>
-
-                            <div class="col-md-6 d-flex align-items-center">
-                                <div class="w-100 text-center">
-                                    <img id="photoPreview" src="#" alt="Preview" style="max-height:120px; display:none; object-fit:cover; border-radius:6px;" />
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label">Notes</label>
-                                <textarea name="notes" rows="3" class="form-control"></textarea>
-                            </div>
-
-                            <div class="col-12 d-flex gap-2 justify-content-end">
-                                <button type="submit" class="btn btn-primary" id="submitBtn">Add Record</button>
-                                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
-                            </div>
+    <!-- Tab Content -->
+    <div class="tab-content">
+        
+        <!-- Tab 1: Add Operational Admin -->
+        <div class="tab-pane fade show active" id="adminPanel" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-user-plus"></i> Create Operational Admin Account</h5>
                         </div>
-                    </form>
+                        <div class="card-body p-4">
+                            {% if error %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ error }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endif %}
+
+                            {% if success %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ success }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endif %}
+
+                            <form method="post" action="{% url 'add_operational_admin' %}" id="adminForm" novalidate>
+                                {% csrf_token %}
+                                
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Email Address</strong></label>
+                                        <input type="email" name="email" class="form-control" placeholder="admin@example.com" required>
+                                        <small class="form-text text-muted">Must be unique. Will be used for login.</small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Username</strong></label>
+                                        <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+                                        <small class="form-text text-muted">Unique identifier for the account.</small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Phone Number</strong></label>
+                                        <input type="tel" name="phone" class="form-control" placeholder="+91 555 555 5555">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Account Type</strong></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-badge"></i></span>
+                                            <input type="text" class="form-control" value="Operational Admin" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Password</strong></label>
+                                        <div class="input-group">
+                                            <input type="password" name="password" id="adminPassword" class="form-control" placeholder="Min 8 characters" required>
+                                            <button type="button" class="btn btn-outline-secondary" id="toggleAdminPwd">
+                                                <img src="{% static 'images/eye-solid.png' %}" alt="Toggle" width="18px" height="18px" id="adminPwdToggle">
+                                            </button>
+                                        </div>
+                                        <div class="progress mt-2" style="height:6px;">
+                                            <div id="adminPwdStrength" class="progress-bar" role="progressbar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Confirm Password</strong></label>
+                                        <div class="input-group">
+                                            <input type="password" name="confirm_password" id="adminConfirmPwd" class="form-control" placeholder="Re-enter password" required>
+                                            <button type="button" class="btn btn-outline-secondary" id="toggleAdminConfirmPwd">
+                                                <img src="{% static 'images/eye-solid.png' %}" alt="Toggle" width="18px" height="18px" id="adminConfirmPwdToggle">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle"></i> <strong>Note:</strong> The new Operational Admin will need to activate their account. An activation link will be sent to their email.
+                                </div>
+
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button type="reset" class="btn btn-outline-secondary">
+                                        <i class="fas fa-redo"></i> Clear
+                                    </button>
+                                    <button type="submit" class="btn btn-success" id="adminSubmitBtn">
+                                        <i class="fas fa-plus"></i> Create Operational Admin
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-tasks"></i> Requirements</h6>
+                        </div>
+                        <div class="card-body small">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success"></i> Valid email address</li>
+                                <li class="mb-2"><i class="fas fa-check text-success"></i> Unique username</li>
+                                <li class="mb-2"><i class="fas fa-check text-success"></i> Strong password (8+ chars)</li>
+                                <li class="mb-2"><i class="fas fa-check text-success"></i> Password confirmation</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-key"></i> Password Requirements</h6>
+                        </div>
+                        <div class="card-body small">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-circle text-warning"></i> At least 8 characters</li>
+                                <li><i class="fas fa-circle text-warning"></i> Include uppercase (A-Z)</li>
+                                <li><i class="fas fa-circle text-warning"></i> Include numbers (0-9)</li>
+                                <li><i class="fas fa-circle text-warning"></i> Include symbols (!@#$%)</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card mb-3">
-                <div class="card-header"><strong>Quick Actions</strong></div>
-                <div class="card-body d-grid gap-2">
-                    <a href="#" class="btn btn-outline-primary">View Patients</a>
-                    <a href="#" class="btn btn-outline-success">View Doctors</a>
-                    <a href="#" class="btn btn-outline-secondary">View Staff</a>
-                </div>
-            </div>
+        <!-- Tab 2: Add Staff -->
+        <div class="tab-pane fade" id="staffPanel" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-user-plus"></i> Add Staff / Personnel</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form method="post" enctype="multipart/form-data" id="staffForm" novalidate>
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Full Name</strong></label>
+                                        <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                                        <div class="invalid-feedback">Please provide a name.</div>
+                                    </div>
 
-            <div class="card">
-                <div class="card-header"><strong>Help</strong></div>
-                <div class="card-body small text-muted">
-                    Fill the required fields and click <strong>Add Record</strong>. For doctors, provide specialty/license.
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Email</strong></label>
+                                        <input type="email" name="email" class="form-control" placeholder="email@example.com" required>
+                                        <div class="invalid-feedback">Please provide a valid email.</div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Phone</strong></label>
+                                        <input type="tel" name="phone" class="form-control" placeholder="(+91) 123-456-7890">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Date of Birth</strong></label>
+                                        <input type="date" name="dob" class="form-control">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Role</strong></label>
+                                        <select name="role" id="roleSelect" class="form-select" required>
+                                            <option value="">Choose a role...</option>
+                                            <option value="patient">Patient</option>
+                                            <option value="doctor">Doctor</option>
+                                            <option value="staff">Staff</option>
+                                        </select>
+                                        <div class="invalid-feedback">Select a role.</div>
+                                    </div>
+
+                                    <div class="col-12" id="doctorFields" style="display:none;">
+                                        <div class="border rounded p-3 bg-light">
+                                            <h6 class="mb-3"><i class="fas fa-stethoscope"></i> Doctor Information</h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Specialty</label>
+                                                    <input type="text" name="specialty" class="form-control" placeholder="e.g., Cardiology">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">License Number</label>
+                                                    <input type="text" name="license" class="form-control" placeholder="License #">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label"><strong>Profile Photo</strong></label>
+                                        <input type="file" name="photo" id="photoInput" accept="image/*" class="form-control">
+                                        <small class="form-text text-muted">Optional. Max 2MB.</small>
+                                    </div>
+
+                                    <div class="col-md-6 d-flex align-items-end justify-content-center">
+                                        <img id="photoPreview" src="#" alt="Preview" style="max-height:120px; display:none; object-fit:cover; border-radius:6px; border: 2px solid #dee2e6; padding: 4px;" />
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label"><strong>Notes / Additional Information</strong></label>
+                                        <textarea name="notes" rows="3" class="form-control" placeholder="Any additional information..."></textarea>
+                                    </div>
+
+                                    <div class="col-12 d-flex gap-2 justify-content-end">
+                                        <button type="reset" class="btn btn-outline-secondary">
+                                            <i class="fas fa-redo"></i> Clear
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" id="staffSubmitBtn">
+                                            <i class="fas fa-plus"></i> Add Staff Member
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-info-circle"></i> Quick Info</h6>
+                        </div>
+                        <div class="card-body small text-muted">
+                            <p>Fill the required fields marked with <strong class="text-danger">*</strong> and click <strong>Add Staff Member</strong> to save the record.</p>
+                            <p class="mb-0">For doctors, provide specialty and license information.</p>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-link"></i> Quick Links</h6>
+                        </div>
+                        <div class="card-body d-grid gap-2">
+                            <a href="#" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye"></i> View All Staff
+                            </a>
+                            <a href="#" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-eye"></i> View All Doctors
+                            </a>
+                            <a href="#" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-eye"></i> View All Patients
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,38 +281,126 @@
 </div>
 
 <script>
-// Role toggle and image preview + simple bootstrap validation
 (function(){
-    const role = document.getElementById('roleSelect');
-    const doctorFields = document.getElementById('doctorFields');
-    const photoInput = document.getElementById('photoInput');
-    const preview = document.getElementById('photoPreview');
+    // Admin Password Toggle
+    const adminPwdInput = document.getElementById('adminPassword');
+    const adminToggleBtn = document.getElementById('toggleAdminPwd');
+    const adminToggleImg = document.getElementById('adminPwdToggle');
+    const adminConfirmInput = document.getElementById('adminConfirmPwd');
+    const adminConfirmToggleBtn = document.getElementById('toggleAdminConfirmPwd');
+    const adminConfirmToggleImg = document.getElementById('adminConfirmPwdToggle');
+    const adminPwdStrength = document.getElementById('adminPwdStrength');
+    const adminForm = document.getElementById('adminForm');
+    const adminSubmitBtn = document.getElementById('adminSubmitBtn');
 
-    function toggleDoctor(){
-        if (role && role.value === 'doctor') doctorFields.style.display = '';
-        else doctorFields.style.display = 'none';
+    // Password strength calculator
+    function scorePassword(s){
+        let score = 0;
+        if (!s) return 0;
+        if (s.length >= 8) score += 25;
+        if (/[A-Z]/.test(s)) score += 20;
+        if (/[0-9]/.test(s)) score += 20;
+        if (/[^A-Za-z0-9]/.test(s)) score += 35;
+        return Math.min(score, 100);
     }
-    if (role) role.addEventListener('change', toggleDoctor);
-    toggleDoctor();
 
-    if (photoInput){
-        photoInput.addEventListener('change', function(){
-            const f = this.files && this.files[0];
-            if (!f) { preview.style.display='none'; return; }
-            if (f.size > 2*1024*1024){ alert('Image too large (max 2MB)'); this.value=''; preview.style.display='none'; return; }
-            const url = URL.createObjectURL(f);
-            preview.src = url; preview.style.display='inline-block';
+    // Admin password toggle
+    if (adminToggleBtn && adminPwdInput) {
+        adminToggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const type = adminPwdInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            adminPwdInput.setAttribute('type', type);
+            adminToggleImg.src = type === 'password' ? "{% static 'images/eye-solid.png' %}" : "{% static 'images/eye-slash-solid.png' %}";
         });
     }
 
-    // Bootstrap form validation
-    const form = document.getElementById('addForm');
-    if (form){
-        form.addEventListener('submit', function(e){
-            if (!form.checkValidity()){
-                e.preventDefault(); e.stopPropagation();
+    // Admin confirm password toggle
+    if (adminConfirmToggleBtn && adminConfirmInput) {
+        adminConfirmToggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const type = adminConfirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            adminConfirmInput.setAttribute('type', type);
+            adminConfirmToggleImg.src = type === 'password' ? "{% static 'images/eye-solid.png' %}" : "{% static 'images/eye-slash-solid.png' %}";
+        });
+    }
+
+    // Admin password strength
+    if (adminPwdInput && adminPwdStrength) {
+        adminPwdInput.addEventListener('input', () => {
+            const s = scorePassword(adminPwdInput.value);
+            adminPwdStrength.style.width = s + '%';
+            adminPwdStrength.className = 'progress-bar ' + (s < 40 ? 'bg-danger' : s < 75 ? 'bg-warning' : 'bg-success');
+        });
+    }
+
+    // Admin form validation
+    if (adminForm) {
+        adminForm.addEventListener('submit', function(e){
+            if (adminPwdInput.value !== adminConfirmInput.value) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('Passwords do not match');
+                return;
             }
-            form.classList.add('was-validated');
+            if (!adminForm.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                adminForm.classList.add('was-validated');
+                return;
+            }
+            adminSubmitBtn.disabled = true;
+            adminSubmitBtn.textContent = 'Creating...';
+        });
+    }
+
+    // Staff form - Role toggle and image preview
+    const roleSelect = document.getElementById('roleSelect');
+    const doctorFields = document.getElementById('doctorFields');
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const staffForm = document.getElementById('staffForm');
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', function(){
+            if (this.value === 'doctor') {
+                doctorFields.style.display = '';
+            } else {
+                doctorFields.style.display = 'none';
+            }
+        });
+    }
+
+    if (photoInput) {
+        photoInput.addEventListener('change', function(){
+            const file = this.files && this.files[0];
+            if (!file) {
+                photoPreview.style.display = 'none';
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Image too large (max 2MB)');
+                this.value = '';
+                photoPreview.style.display = 'none';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                photoPreview.src = e.target.result;
+                photoPreview.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Staff form validation
+    if (staffForm) {
+        staffForm.addEventListener('submit', function(e){
+            if (!this.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.add('was-validated');
+                return;
+            }
         }, false);
     }
 })();

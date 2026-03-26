@@ -198,7 +198,13 @@ class AdminLoginAPI(APIView):
         password = request.data.get("Password")
 
         try:
-            admin = AdminLogin.objects.get(Email=email, Password=password)
+            admin = AdminLogin.objects.get(Email=email)
+
+            # Verify password using the check_password method
+            if not admin.check_password(password):
+                return Response({
+                    "message": "Invalid credentials. Please register."
+                }, status=404)
 
             if admin.Status == False:
                 return Response({

@@ -11,10 +11,12 @@
                     <div class="card-body p-4">
                         <h3 class="card-title mb-3">Sign in to HCLSDB</h3>
 
-                        {% if errors %}
-                            <div class="alert alert-danger" role="alert">{{error}}
-                                Please correct the errors below.
-                            </div>
+                        {% if error %}
+                            <div class="alert alert-danger" role="alert">{{ error }}</div>
+                        {% endif %}
+
+                        {% if success %}
+                            <div class="alert alert-success" role="alert">{{ success }}</div>
                         {% endif %}
 
                         <form method="post" action="{% url 'login' %}" id="loginForm" novalidate>
@@ -29,7 +31,9 @@
                                 <label for="password" class="form-label">Password</label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password" aria-label="Password">
-                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword" aria-label="Show password">Show</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword" aria-label="Show password" style="border: 1px solid #dee2e6;">
+                                        <img src="{% static 'images/eye-solid.png' %}" alt="Show password" id="passwordToggle" width="20px" height="20px">
+                                    </button>
                                 </div>
                             </div>
 
@@ -39,12 +43,12 @@
                             </div>
 
                             <div class="d-grid mb-3">
-                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Login</button>
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Sign in</button>
                             </div>
 
                             <div class="d-flex justify-content-between small">
                                 <div>Don't have an account? <a href="{% url 'register' %}">Register</a></div>
-                                <div><a href="#" class="link-secondary">Forgot password?</a></div>
+                                <div><a href="{% url 'forgot_password' %}" class="link-secondary">Forgot password?</a></div>
                             </div>
 
                             <hr class="my-4">
@@ -64,11 +68,26 @@
         (function(){
             const toggle = document.getElementById('togglePassword');
             const pwd = document.getElementById('password');
-            if (toggle && pwd) toggle.addEventListener('click', ()=>{
-                const type = pwd.getAttribute('type') === 'password' ? 'text' : 'password';
-                pwd.setAttribute('type', type);
-                toggle.textContent = type === 'password' ? 'Show' : 'Hide';
-            });
+            const toggleImg = document.getElementById('passwordToggle');
+            
+            if (toggle && pwd && toggleImg) {
+                toggle.addEventListener('click', (e)=>{
+                    e.preventDefault();
+                    const type = pwd.getAttribute('type') === 'password' ? 'text' : 'password';
+                    pwd.setAttribute('type', type);
+                    
+                    // Change image based on password visibility state
+                    if (type === 'password') {
+                        toggleImg.src = "{% static 'images/eye-solid.png' %}";
+                        toggleImg.alt = "Show password";
+                        toggle.setAttribute('aria-label', 'Show password');
+                    } else {
+                        toggleImg.src = "{% static 'images/eye-slash-solid.png' %}";
+                        toggleImg.alt = "Hide password";
+                        toggle.setAttribute('aria-label', 'Hide password');
+                    }
+                });
+            }
 
             const form = document.getElementById('loginForm');
             const submitBtn = document.getElementById('submitBtn');

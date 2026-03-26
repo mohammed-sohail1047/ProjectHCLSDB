@@ -164,7 +164,7 @@
                         <div id="headerTime" class="fw-semibold"></div>
                         <div class="small text-muted">Local time</div>
 
-                        <form method="post" action="#">
+                        <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger mt-2">
                                 Logout

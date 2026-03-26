@@ -199,13 +199,23 @@
         
         <div class="form-group">
           <label for="confirmPassword">Confirm Your Password:</label>
-          <input 
-            type="password" 
-            id="confirmPassword" 
-            name="password" 
-            required 
-            placeholder="Enter your password to confirm activation"
-            autocomplete="current-password">
+          <div class="input-group" style="display: flex; gap: 0;">
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              name="password" 
+              required 
+              placeholder="Enter your password to confirm activation"
+              autocomplete="current-password"
+              style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px 0 0 5px; font-size: 1rem;">
+            <button 
+              type="button" 
+              id="togglePassword" 
+              style="padding: 10px 12px; border: 1px solid #ddd; border-left: none; border-radius: 0 5px 5px 0; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+              aria-label="Show password">
+              <img src="{% static 'images/eye-solid.png' %}" alt="Show password" id="passwordToggle" width="20px" height="20px">
+            </button>
+          </div>
         </div>
 
         <button type="submit" class="btn-activate">
@@ -683,6 +693,32 @@ function checkActivationStatus() {
 
 // Check every 5 minutes
 // setInterval(checkActivationStatus, 5 * 60 * 1000);
+
+// Show/Hide Password Toggle
+(function(){
+  const toggle = document.getElementById('togglePassword');
+  const pwd = document.getElementById('confirmPassword');
+  const toggleImg = document.getElementById('passwordToggle');
+  
+  if (toggle && pwd && toggleImg) {
+    toggle.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const type = pwd.getAttribute('type') === 'password' ? 'text' : 'password';
+      pwd.setAttribute('type', type);
+      
+      // Change image based on password visibility state
+      if (type === 'password') {
+        toggleImg.src = "{% static 'images/eye-solid.png' %}";
+        toggleImg.alt = "Show password";
+        toggle.setAttribute('aria-label', 'Show password');
+      } else {
+        toggleImg.src = "{% static 'images/eye-slash-solid.png' %}";
+        toggleImg.alt = "Hide password";
+        toggle.setAttribute('aria-label', 'Hide password');
+      }
+    });
+  }
+})();
 </script>
 
 {% endblock %}
