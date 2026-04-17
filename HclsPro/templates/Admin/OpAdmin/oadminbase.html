@@ -1,275 +1,197 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Operational Admin - HCLSDB</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Automanager Healthcare System - Operational Admin Dashboard">
+    <title>{% block title %}Operational Admin - AHS{% endblock %}</title>
     {% block extra_head %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=3.0">
     <link rel="icon" href="{% static 'images/hlogo2.png' %}" type="image/png">
+    <script>
+        const savedTheme = localStorage.getItem('ahs-theme') || 'light';
+        if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    </script>
 </head>
 <body>
-
-<table border="1" width="100%" height="600px">
-    <tr>
-
-        <!-- LEFT NAV -->
-        <td width="20%" valign="top" class="bg-dark" style="padding-left:20px;">
-
-            <h4 class="text-white text-center" style="font-size: 20px; padding:5px; text-decoration: underline;">AHS(Automanager Healthcare System)</h4>
-            <hr class="border-white">
-
-            <button class="btn btn-dark btn btn-outline-secondary" style="height: 40px;margin-bottom: 10px;" ><a href="{% url 'OAdashboard' %}" style="text-align: center; color: white; text-decoration: none;">Dashboard</a></button>
-            <button class="btn btn-dark btn btn-outline-secondary" style="height: 40px; margin-bottom: 10px;" ><a href="{% url 'OAprofile' %}" style="text-align: center; color: white; text-decoration: none;">Profile</a></button>
-
-           <div class="d-grid gap-5">
-
-    <!-- Doctor -->
-    <div class="dropdown w-100">
-        <button class="btn btn-dark btn btn-outline-secondary  w-10" data-bs-toggle="dropdown" style="text-align: left; color: white;">
-            Doctor
-        </button>
-
-        <ul class="dropdown-menu w-10 shadow">
-            <li>
-                <a class="dropdown-item" href="{% url 'doctoradd' %}">
-                    Add Doctor
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="{% url 'doctormanage' %}">
-                    Manage Doctor
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Helper -->
-    <div class="dropdown w-100">
-        <button class="btn btn-dark btn btn-outline-secondary  w-10"
-                data-bs-toggle="dropdown" style="text-align: left; color: white;">
-            Helper
-        </button>
-
-        <ul class="dropdown-menu w-10 shadow">
-            <li>
-                <a class="dropdown-item" href="{% url 'helperadd' %}">
-                    Add Helper
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="{% url 'helpermanage' %}">
-                    Manage Helper
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Receptionist -->
-    <div class="dropdown w-100">
-        <button class="btn btn-dark btn btn-outline-secondary  w-10"
-                data-bs-toggle="dropdown" style="text-align: left; color: white;">
-            Receptionist
-        </button>
-
-        <ul class="dropdown-menu w-10 shadow">
-            <li>
-                <a class="dropdown-item" href="{% url 'receptionistadd' %}">
-                    Add Receptionist
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="{% url 'receptionistmanage' %}">
-                    Manage Receptionist
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Pharmacy -->
-    <div class="dropdown w-100">
-        <button class="btn btn-dark btn btn-outline-secondary  w-10"
-                data-bs-toggle="dropdown" style="text-align: left; color: white;">
-            Pharmacist
-        </button>
-
-        <ul class="dropdown-menu w-10 shadow">
-            <li>
-                <a class="dropdown-item" href="#">
-                    Add Pharmacist
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="#">
-                    Manage Pharmacist
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Diagonist -->
-    <div class="dropdown w-100">
-        <button class="btn btn-dark btn btn-outline-secondary  w-10"
-                data-bs-toggle="dropdown" style="text-align: left; color: white;">
-            Diagonist Lab
-        </button>
-
-        <ul class="dropdown-menu w-10 shadow">
-            <li>
-                <a class="dropdown-item" href="#">
-                    Add Lab Incharge
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="#">
-                    Manage Lab Incharge
-                </a>
-            </li>
-        </ul>
-    </div>
-
-</div>
-        </td>
-
-        <!-- RIGHT CONTENT -->
-        <td width="80%" valign="top">
-
-            <!-- HEADER -->
-            <header class="py-3 border-bottom">
-                <div class="container-fluid d-flex justify-content-between align-items-center">
-
-                    <div class="d-flex align-items-center">
-                        <a href="{% url 'home' %}" class="me-3">
-                            <img src="{% static 'images/hospitallogo.png' %}" 
-                                 alt="Logo" width="72" height="72">
-                        </a>
-
-                        <div>
-                            <div class="small text-muted">
-                                <strong><h3>AHS Operational Admin</h3></strong>Welcome back</div>
-                            <div class="h5 mb-0">
-                                Hi,
-                                {% if admin_name %}
-                                    {{ admin_name }}
-                                {% elif request.user.is_authenticated %}
-                                    {{ request.user.get_full_name|default:request.user.username }}
-                                {% else %}
-                                    Guest
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-end">
-                        <div id="headerTime" class="fw-semibold"></div>
-                        <div class="small text-muted">Local time</div>
-
-                        <form method="post" action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger mt-2">
-                                Logout
-                            </button>
-                        </form>
-                    </div>
-
-                </div>
-            </header>
-
-            <!-- PAGE CONTENT -->
-            <div style="padding:20px;">
-                {% block content %}
-                {% endblock %}
-            </div>
-
-            <!-- FOOTER -->
-            <footer class="bg-dark text-white py-3">
-                <div class="container-fluid d-flex justify-content-between align-items-center">
-
-                    <div class="small">
-                        &copy; {{ year|default:2026 }} AHS App. All rights reserved.
-                    </div>
-
-                    <div class="small">
-                        <a href="#" class="text-white text-decoration-none me-3">About</a>
-                        <a href="#" class="text-white text-decoration-none me-3">Privacy</a>
-                        <a href="#" class="text-white text-decoration-none" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</a>
-                    </div>
-                    <!-- <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="contactModalLabel">Contact AHS</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="contactForm">
-                    <div class="mb-3">
-                        <label for="contactEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="contactEmail" placeholder="you@example.com" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="contactMessage" class="form-label">Message</label>
-                        <textarea class="form-control" id="contactMessage" rows="3" required></textarea>
-                    </div>
-                    <div class="d-grid">
-                        <button class="btn btn-primary" type="submit">Send</button>
-                    </div>
-                </form>
+<div class="app-container">
+    <aside class="modern-sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <a href="{% url 'OAdashboard' %}">
+                <img src="{% static 'images/hospitallogo.png' %}" alt="Logo">
+            </a>
+            <div>
+                <h6 class="mb-0 brand-font text-white">AHS Pro</h6>
+                <small class="text-white-50">Operations workspace</small>
             </div>
         </div>
-    </div>
-</div> -->
 
-                    <div>
-                        <a href="#"><img src="{% static 'images/facebook.png' %}" width="22" height="22"></a>
-                        <a href="#"><img src="{% static 'images/twitter.png' %}" width="22" height="22"></a>
-                        <a href="#"><img src="{% static 'images/instagram.png' %}" width="22" height="22"></a>
-                        <a href="#"><img src="{% static 'images/linkedin.png' %}" width="22" height="22"></a>
-                    </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Control Room</div>
+            <a class="nav-link {% if request.resolver_match.url_name == 'OAdashboard' %}active{% endif %}" href="{% url 'OAdashboard' %}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                Dashboard
+            </a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'OAprofile' %}active{% endif %}" href="{% url 'OAprofile' %}">
+                <i class="bi bi-person-fill"></i>
+                Profile
+            </a>
 
+            <div class="nav-section-label">Teams</div>
+            <div class="nav-item">
+                <button class="btn btn-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#doctor-collapse" aria-expanded="false">
+                    <span><i class="bi bi-heart-pulse-fill me-2"></i> Doctors</span>
+                </button>
+                <div class="collapse" id="doctor-collapse">
+                    <ul class="btn-toggle-nav">
+                        <li><a href="{% url 'doctoradd' %}">Add Doctor</a></li>
+                        <li><a href="{% url 'doctormanage' %}">Manage Doctors</a></li>
+                    </ul>
                 </div>
-
+            </div>
+            <div class="nav-item">
+                <button class="btn btn-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#helper-collapse" aria-expanded="false">
+                    <span><i class="bi bi-person-hearts me-2"></i> Helpers</span>
+                </button>
+                <div class="collapse" id="helper-collapse">
+                    <ul class="btn-toggle-nav">
+                        <li><a href="{% url 'helperadd' %}">Add Helper</a></li>
+                        <li><a href="{% url 'helpermanage' %}">Manage Helpers</a></li>
+                    </ul>
                 </div>
-            </footer>
+            </div>
+            <div class="nav-item">
+                <button class="btn btn-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#receptionist-collapse" aria-expanded="false">
+                    <span><i class="bi bi-headset me-2"></i> Receptionists</span>
+                </button>
+                <div class="collapse" id="receptionist-collapse">
+                    <ul class="btn-toggle-nav">
+                        <li><a href="{% url 'receptionistadd' %}">Add Receptionist</a></li>
+                        <li><a href="{% url 'receptionistmanage' %}">Manage Receptionists</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
-        </td>
-    </tr>
-</table>
+        <div class="sidebar-pulse">
+            <div class="muted-small text-white-50">Today at a glance</div>
+            <div class="pulse-value">Ready</div>
+            <div class="muted-small text-white-50">Monitor queues, staff lanes, and patient movement from a single surface.</div>
+        </div>
+    </aside>
 
+    <main class="main-content">
+        <header class="glass-header px-4 py-2 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light d-lg-none btn-sm" type="button" id="sidebarToggle" title="Toggle Sidebar">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <div>
+                    <div class="workspace-chip mb-2"><i class="bi bi-activity"></i> Operations Command</div>
+                    <h6 class="mb-0 brand-font">Hello, {{ admin_name|default:'Operator' }}</h6>
+                    <div class="muted-small">Keep the front desk, wards, and support teams moving together.</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-light position-relative rounded-circle p-2" id="themeToggle" title="Toggle Dark Mode">
+                    <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                </button>
+                <div id="headerTime" class="fw-semibold text-dark d-none d-xl-block px-3"></div>
+                <form method="post" action="{% url 'logout' %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-rich secondary btn-sm">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span class="d-none d-md-inline">Logout</span>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <div class="sub-header px-4 py-3 d-flex align-items-center justify-content-between gap-3 flex-wrap">
+            <div>
+                <div class="brand-font">Operational control room</div>
+                <div class="muted-small">Quick visibility into staffing, admissions, and patient flow.</div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'doctoradd' %}" class="btn btn-rich primary btn-sm"><i class="bi bi-plus-circle"></i> Add Doctor</a>
+                <a href="{% url 'receptionistmanage' %}" class="btn btn-rich secondary btn-sm"><i class="bi bi-people"></i> Manage Teams</a>
+            </div>
+        </div>
+
+        <div class="content-shell flex-grow-1 animate-fade-in">
+            {% block content %}{% endblock %}
+        </div>
+
+        <footer class="bg-white border-top py-4 mt-auto">
+            <div class="container-fluid px-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <div class="brand-font">AHS Pro Operations</div>
+                    <div class="muted-small">Built to reduce friction for everyday hospital execution.</div>
+                </div>
+                <div class="d-flex gap-3 muted-small">
+                    <span>Fast handoffs</span>
+                    <span>Care continuity</span>
+                    <span>&copy; {{ year|default:2026 }}</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-(function(){
-    function pad(n){ return n < 10 ? '0' + n : n; }
-    function update(){
+(function () {
+    function updateClock() {
         const el = document.getElementById('headerTime');
-        if(!el) return;
-        const d = new Date();
-        let h = d.getHours();
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        h = h % 12 || 12;
-        el.textContent = pad(h) + ':' + 
-                         pad(d.getMinutes()) + ':' + 
-                         pad(d.getSeconds()) + ' ' + ampm;
+        if (!el) return;
+        el.textContent = new Date().toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
     }
-    update();
-    setInterval(update, 1000);
-    // const contactForm = document.getElementById('contactForm');
-    //     if (contactForm) {
-    //         contactForm.addEventListener('submit', function(e){
-    //             e.preventDefault();
-    //             // lightweight UX-only submission: show success then close
-    //             const btn = this.querySelector('button[type="submit"]');
-    //             btn.disabled = true; btn.textContent = 'Sending...';
-    //             setTimeout(()=>{
-    //                 btn.disabled = false; btn.textContent = 'Send';
-    //                 const m = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
-    //                 m.hide();
-    //                 alert('Thank you — we will respond to ' + document.getElementById('contactEmail').value + '.');
-    //                 this.reset();
-    //             }, 800);
-    //         });
-    //     }
+
+    function syncThemeIcon() {
+        const themeIcon = document.getElementById('themeIcon');
+        if (!themeIcon) return;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        themeIcon.className = isDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        updateClock();
+        setInterval(updateClock, 60000);
+        syncThemeIcon();
+
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebar && sidebarToggle) {
+            sidebarToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('sidebar-open');
+            });
+        }
+
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function () {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('ahs-theme', 'light');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('ahs-theme', 'dark');
+                }
+                syncThemeIcon();
+            });
+        }
+    });
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,96 @@
+{% extends 'Admin/MAdmin/mabase.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0 brand-font">Edit Admin - {{ admin.username }}</h2>
+                <a href="{% url 'manage' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Back to Manage
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-bottom pt-4 pb-3">
+                    <h5 class="mb-0 brand-font">Update Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="editForm" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="email" name="email" id="floatEmail" class="form-control" value="{{ admin.email }}" required>
+                                    <label for="floatEmail">Email Address</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" name="username" id="floatUser" class="form-control" value="{{ admin.username|default:'' }}" required>
+                                    <label for="floatUser">Username</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" name="phone" id="floatPhone" class="form-control" value="{{ admin.phone|default:'' }}">
+                                    <label for="floatPhone">Phone Number</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mt-3 pt-2">
+                                    <input class="form-check-input" type="checkbox" name="status" id="statusSwitch" {% if admin.status %}checked{% endif %}>
+                                    <label class="form-check-label" for="statusSwitch">Active Status</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'manage' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary" id="editSubmitBtn">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const editForm = document.getElementById('editForm');
+    const editSubmitBtn = document.getElementById('editSubmitBtn');
+
+    if (editForm) {
+        editForm.addEventListener('submit', function(e){
+            if (!editForm.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                editForm.classList.add('was-validated');
+                return;
+            }
+            editSubmitBtn.disabled = true;
+            editSubmitBtn.textContent = 'Saving...';
+        });
+    }
+</script>
+{% endblock %}

@@ -1,91 +1,215 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Admin Panel{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+    <meta name="description" content="Automanager Healthcare System - Smart healthcare management for modern hospitals.">
+    <meta name="keywords" content="AHS, Healthcare, Management, Patient DB, Hospital">
+    <title>{% block title %}AHS - Automanager Healthcare System{% endblock %}</title>
+    
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=2.0">
     <link rel="icon" href="{% static 'images/hlogo2.png' %}" type="image/png">
+    <script>
+        const savedTheme = localStorage.getItem('ahs-theme') || 'light';
+        if(savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    </script>
     
     {% block extra_head %}{% endblock %}
 </head> 
-<body>
-    <header class="site-header py-3">
-        <div class="container-fluid">
+<body class="bg-color d-flex flex-column min-vh-100">
+
+    <!-- GLASS HEADER -->
+    <header class="glass-header py-3">
+        <div class="container">
             <div class="d-flex align-items-center justify-content-between">
+                
                 <div class="site-brand">
-                    <a href="{% url 'home' %}"><img src="{% static 'images/hospitallogo.png' %}" alt="Logo" width="72" height="72"></a>
+                    <a href="{% url 'home' %}" class="text-decoration-none">
+                        <img src="{% static 'images/hospitallogo.png' %}" alt="AHS Logo" width="64" height="64" class="shadow-sm">
+                    </a>
                     <div>
-                        <div class="h5 mb-0 text-white"><strong>AHS</strong></div>
-                        <div class="small text-white-50">Hospital Management Admin</div>
+                        <div class="h5 mb-0 brand-font fw-bold" style="background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AHS Pro</div>
+                        <div class="muted-small fw-medium">Hospital Management</div>
                     </div>
                 </div>
 
-                                <nav class="navbar navbar-expand-lg navbar-dark bg-transparent p-0">
-                                        <div class="d-flex gap-2">
-                                                <a class="btn btn-rich secondary" href="{% url 'home' %}"><span class="icon">&#127968;</span><span>Home</span></a>
-                                                <a class="btn btn-rich secondary" href="{% url 'login' %}"><span class="icon">&#128274;</span><span>Login</span></a>
-                                                <a class="btn btn-rich secondary" href="{% url 'register' %}"><span class="icon">&#9997;</span><span>Register</span></a>
-                                        </div>
-                                </nav>
+                <nav class="navbar navbar-expand-lg border-0 p-0">
+                    <div class="d-none d-md-flex align-items-center gap-3">
+                        <button class="btn btn-sm btn-light position-relative rounded-circle p-2 mx-2" id="themeToggle" title="Toggle Dark Mode">
+                            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                        </button>
+                        <a class="btn btn-rich ghost nav-link fw-medium px-3 text-dark hover-primary" href="{% url 'home' %}">
+                             Home
+                        </a>
+                        <a class="btn btn-rich ghost nav-link fw-medium px-4 hover-primary" href="{% url 'login' %}">
+                            Sign In
+                        </a>
+                        <a class="btn btn-rich primary px-4 shadow-sm" href="{% url 'register' %}">
+                            Register
+                        </a>
+                    </div>
+                    <!-- Mobile Menu Toggle -->
+                    <button class="btn btn-light d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                </nav>
+
             </div>
+            
+            <!-- Mobile Menu -->
+            <div class="collapse d-md-none mt-3" id="mobileMenu">
+                <div class="d-flex flex-column gap-2 bg-white rounded p-3 shadow-sm border">
+                    <a class="text-decoration-none text-dark fw-medium py-2 border-bottom" href="{% url 'home' %}">Home</a>
+                    <a class="text-decoration-none text-dark fw-medium py-2 border-bottom" href="{% url 'login' %}">Sign In</a>
+                    <a class="text-decoration-none text-primary fw-bold py-2" href="{% url 'register' %}">Create Account</a>
+                </div>
+            </div>
+            
         </div>
     </header>
 
-        <!-- Hero removed from base; include on home page only -->
-    <main class="container py-4">
+    <!-- MAIN CONTENT -->
+    <!-- The hero wrapper dynamically encloses content for a beautiful background -->
+    <main class="flex-grow-1 d-flex flex-column animate-fade-in">
         {% block content %}{% endblock %}
     </main>
-    <hr/>
-    <!-- FOOTER -->
-            <footer class="bg-dark text-white py-3">
-                <div class="container-fluid d-flex justify-content-between align-items-center">
 
-                    <div class="small">
-                        &copy; {{ year|default:2026 }} AHS App. All rights reserved.
+    <!-- PREMIUM FOOTER -->
+    <footer class="bg-white border-top py-5 mt-5">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-12 col-md-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{% static 'images/hospitallogo.png' %}" alt="Logo" width="40" height="40" class="me-2 rounded shadow-sm">
+                        <span class="h6 mb-0 brand-font fw-bold">AHS Pro</span>
                     </div>
+                    <p class="muted-small w-75">
+                        Streamline your hospital operations, better patient care, and modern healthcare administration in one rich platform.
+                    </p>
+                </div>
+                
+                <div class="col-6 col-md-3">
+                    <h6 class="fw-bold mb-3 brand-font">Product</h6>
+                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2 muted-small">
+                        <li><a href="#" class="text-decoration-none text-muted">Features</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Pricing</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Security</a></li>
+                    </ul>
+                </div>
 
-                    <div class="small">
-                        <a href="#" class="text-white text-decoration-none me-3">About</a>
-                        <a href="#" class="text-white text-decoration-none me-3">Privacy</a>
-                        <a href="#" class="text-white text-decoration-none" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</a>
+                <div class="col-6 col-md-3">
+                    <h6 class="fw-bold mb-3 brand-font">Support</h6>
+                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2 muted-small">
+                        <li><a href="#" class="text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#contactModal">Contact Us</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Documentation</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-12 col-md-2 text-md-end">
+                    <h6 class="fw-bold mb-3 brand-font">Follow Us</h6>
+                    <div class="d-flex gap-2 justify-content-md-end">
+                        <a href="#" class="text-muted"><img src="{% static 'images/facebook.png' %}" width="24" height="24"></a>
+                        <a href="#" class="text-muted"><img src="{% static 'images/twitter.png' %}" width="24" height="24"></a>
+                        <a href="#" class="text-muted"><img src="{% static 'images/instagram.png' %}" width="24" height="24"></a>
                     </div>
-                    <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="contactModalLabel">Contact AHS</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
             </div>
-            <div class="modal-body">
-                <form id="contactForm">
-                    <div class="mb-3">
-                        <label for="contactEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="contactEmail" placeholder="you@example.com" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="contactMessage" class="form-label">Message</label>
-                        <textarea class="form-control" id="contactMessage" rows="3" required></textarea>
-                    </div>
-                    <div class="d-grid">
-                        <button class="btn btn-primary" type="submit">Send</button>
-                    </div>
-                </form>
+            
+            <hr class="my-4 text-muted opacity-25">
+            
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center muted-small">
+                <span>&copy; {{ year|default:2026 }} Automanager Healthcare System. All rights reserved.</span>
+                <span class="mt-2 mt-md-0">Designed elegantly in a modern environment.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Contact Modal -->
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light border-0">
+                    <h5 class="modal-title brand-font fw-bold" id="contactModalLabel">Get in Touch</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="contactForm">
+                        <div class="mb-3">
+                            <label for="contactEmail" class="form-label fw-medium small">Email Address</label>
+                            <input type="email" class="form-control form-control-lg bg-light border-0" id="contactEmail" placeholder="name@example.com" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="contactMessage" class="form-label fw-medium small">Message</label>
+                            <textarea class="form-control bg-light border-0" id="contactMessage" rows="4" placeholder="How can we help?" required></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-rich primary btn-lg" type="submit">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-                    <div>
-                        <a href="#"><img src="{% static 'images/facebook.png' %}" width="22" height="22"></a>
-                        <a href="#"><img src="{% static 'images/twitter.png' %}" width="22" height="22"></a>
-                        <a href="#"><img src="{% static 'images/instagram.png' %}" width="22" height="22"></a>
-                        <a href="#"><img src="{% static 'images/linkedin.png' %}" width="22" height="22"></a>
-                    </div>
-
-                </div>
-            </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Upgrade cards inside the public view if any exist in the content block
+        document.querySelectorAll('.card').forEach(card => {
+            if(!card.classList.contains('card-modern')){
+                card.classList.add('card-modern');
+                card.classList.remove('shadow-sm', 'shadow');
+            }
+        });
+        
+        // Modal logic
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(e){
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                btn.disabled = true; 
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Sending...';
+                
+                setTimeout(() => {
+                    btn.disabled = false; 
+                    btn.innerHTML = 'Submit Request';
+                    const m = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+                    m.hide();
+                    alert('Thanks for your message! We will reply shortly.');
+                    this.reset();
+                }, 1000);
+            });
+        }
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        if(themeToggle && themeIcon) {
+            const currentTheme = localStorage.getItem('ahs-theme') || 'light';
+            if(currentTheme === 'dark') {
+                themeIcon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
+                themeIcon.classList.add('text-warning');
+            }
+            themeToggle.addEventListener('click', () => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                if(isDark) {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('ahs-theme', 'light');
+                    themeIcon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
+                    themeIcon.classList.remove('text-warning');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('ahs-theme', 'dark');
+                    themeIcon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
+                    themeIcon.classList.add('text-warning');
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

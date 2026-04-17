@@ -6,20 +6,19 @@
 {% block content %}
 
 <!-- Hero (home page only) -->
-<div class="container-fluid bg-light py-5" aria-labelledby="home-hero">
-    <div class="container">
+<div class="hero-banner mx-4 mt-4" aria-labelledby="home-hero">
+    <div class="container position-relative z-index-1">
         <div class="row align-items-center">
             <div class="col-lg-7">
-                <h1 id="home-hero" class="display-5 fw-bold">Welcome to AHS(Automanager Healthcare System) Admin</h1>
-                <p class="lead text-muted">Centralized hospital data, staffing and appointments — fast, secure, and simple.</p>
-                <p class="mb-4">Login to manage records or register to get started.</p>
-                <div class="d-flex gap-2">
-                    <a href="{% url 'login' %}" class="btn-rich primary btn-lg" style="text-decoration: none;">Login</a>
-                    <a href="{% url 'register' %}" class="btn-rich ghost btn-lg" style="text-decoration: none;">Register</a>
+                <h1 id="home-hero" class="display-4 fw-bold mb-3 brand-font">Welcome to AHS Pro</h1>
+                <p class="lead mb-4 opacity-75">Centralized hospital data, staffing and appointments — fast, secure, and simple.</p>
+                <div class="d-flex gap-3 mt-4">
+                    <a href="{% url 'login' %}" class="btn btn-light text-primary fw-bold btn-lg px-4 shadow-sm" style="border-radius: var(--radius-lg);">Sign In</a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg px-4" style="border-radius: var(--radius-lg);">Create Account</a>
                 </div>
             </div>
             <div class="col-lg-5 d-none d-lg-block text-center">
-                <!-- <img src="{% static 'images/hero-doctor.png' %}" alt="AHS illustration" class="img-fluid" style="max-height:260px"> -->
+                <!-- <img src="{% static 'images/hero-doctor.png' %}" alt="AHS illustration" class="img-fluid" style="max-height:260px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));"> -->
             </div>
         </div>
     </div>

@@ -1,170 +1,192 @@
 {% extends 'Admin/OpAdmin/oadminbase.html' %}
 
 {% block content %}
+<div class="d-grid gap-4">
+    <section class="page-hero hero-grid">
+        <div>
+            <div class="hero-eyebrow"><i class="bi bi-hospital"></i> Care flow visibility</div>
+            <h2 class="mt-3 mb-2">Run day-to-day operations from a cleaner command surface.</h2>
+            <p class="mb-0 text-white-50">See queue pressure, admissions, and support coverage quickly so the front desk stays ahead.</p>
+        </div>
+        <div class="dashboard-panel bg-white bg-opacity-10 border border-white border-opacity-10 text-white">
+            <div class="small text-uppercase text-white-50">Today</div>
+            <div class="brand-font fs-3">{{ appointments_today }} active arrivals</div>
+            <div class="muted-small text-white-50">{{ admissions_pending }} admissions still open for follow-through.</div>
+        </div>
+    </section>
 
-<div class="container-fluid py-3">
-	<div class="row mb-3">
-		<div class="col">
-			<h2 class="mb-0">Dashboard</h2>
-			<small class="text-muted">Overview of daily operations and quick actions</small>
-		</div>
-		<div class="col-auto">
-			<a href="/opadmin/reports/" class="btn btn-sm btn-outline-secondary">Reports</a>
-		</div>
-	</div>
+    <section class="metric-grid">
+        <article class="metric-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="metric-kicker">Appointments Today</div>
+                    <div class="metric-value">{{ appointments_today|default:0 }}</div>
+                    <div class="metric-meta">Patient entries logged today</div>
+                </div>
+                <div class="metric-icon"><i class="bi bi-calendar2-check-fill"></i></div>
+            </div>
+        </article>
+        <article class="metric-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="metric-kicker">Admissions Pending</div>
+                    <div class="metric-value">{{ admissions_pending|default:0 }}</div>
+                    <div class="metric-meta">Active admissions awaiting closure</div>
+                </div>
+                <div class="metric-icon"><i class="bi bi-journal-medical"></i></div>
+            </div>
+        </article>
+        <article class="metric-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="metric-kicker">Lab Follow-ups</div>
+                    <div class="metric-value">{{ lab_results_pending|default:0 }}</div>
+                    <div class="metric-meta">Potential records needing medication updates</div>
+                </div>
+                <div class="metric-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+            </div>
+        </article>
+        <article class="metric-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="metric-kicker">Unread Admin Items</div>
+                    <div class="metric-value">{{ unread_messages|default:0 }}</div>
+                    <div class="metric-meta">Pending account follow-ups</div>
+                </div>
+                <div class="metric-icon"><i class="bi bi-chat-left-dots-fill"></i></div>
+            </div>
+        </article>
+    </section>
 
-	<div class="row g-3">
-		<div class="col-md-3">
-			<div class="card shadow-sm">
-				<div class="card-body d-flex align-items-center">
-					<div class="me-3 bg-primary text-white rounded p-2">
-						<svg width="28" height="28" viewBox="0 0 16 16" fill="currentColor"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/><path fill-rule="evenodd" d="M8 8a3 3 0 100-6 3 3 0 000 6z"/></svg>
-					</div>
-					<div>
-						<div class="small text-muted">Appointments Today</div>
-						<div class="h5 mb-0">{{ appointments_today|default:0 }}</div>
-					</div>
-				</div>
-			</div>
-		</div>
+    <section class="row g-4">
+        <div class="col-xl-8 d-grid gap-4">
+            <div class="card-modern">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="brand-font">Operations feed</div>
+                        <div class="muted-small">Recent handoffs and movement around the system.</div>
+                    </div>
+                    <span class="workspace-chip"><i class="bi bi-lightning-charge"></i> Live queue</span>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table table-modern align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Event</th>
+                                    <th>Source</th>
+                                    <th class="text-end">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ev in operations %}
+                                <tr>
+                                    <td class="muted-small">{{ ev.timestamp|date:'M d, h:i A' }}</td>
+                                    <td>{{ ev.description }}</td>
+                                    <td class="muted-small">{{ ev.source }}</td>
+                                    <td class="text-end">
+                                        <span class="status-badge {% if ev.level == 'warning' %}warning{% elif ev.level == 'error' %}danger{% else %}success{% endif %}">
+                                            {% if ev.level == 'warning' %}Attention{% elif ev.level == 'error' %}Issue{% else %}Stable{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">No operations to show yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-		<div class="col-md-3">
-			<div class="card shadow-sm">
-				<div class="card-body d-flex align-items-center">
-					<div class="me-3 bg-warning text-dark rounded p-2">
-						<svg width="28" height="28" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a3 3 0 00-3 3v1H4a2 2 0 00-2 2v3h12V7a2 2 0 00-2-2h-1V4a3 3 0 00-3-3z"/></svg>
-					</div>
-					<div>
-						<div class="small text-muted">Pending Admissions</div>
-						<div class="h5 mb-0">{{ admissions_pending|default:0 }}</div>
-					</div>
-				</div>
-			</div>
-		</div>
+            <div class="card-modern">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="brand-font">Seven-day movement</div>
+                        <div class="muted-small">Patient entry volume captured over the last week.</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="opChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-		<div class="col-md-3">
-			<div class="card shadow-sm">
-				<div class="card-body d-flex align-items-center">
-					<div class="me-3 bg-success text-white rounded p-2">
-						<svg width="28" height="28" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v2H2z"/><path d="M3 6h10v6H3z"/></svg>
-					</div>
-					<div>
-						<div class="small text-muted">Lab Results</div>
-						<div class="h5 mb-0">{{ lab_results_pending|default:0 }}</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="col-md-3">
-			<div class="card shadow-sm">
-				<div class="card-body d-flex align-items-center">
-					<div class="me-3 bg-info text-white rounded p-2">
-						<svg width="28" height="28" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v10H2z"/></svg>
-					</div>
-					<div>
-						<div class="small text-muted">Unread Messages</div>
-						<div class="h5 mb-0">{{ unread_messages|default:0 }}</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div class="row mt-3">
-		<div class="col-lg-8">
-			<div class="card mb-3">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center mb-2">
-						<h5 class="card-title mb-0">Operations Feed</h5>
-						<small class="text-muted">Latest updates</small>
-					</div>
-					<div class="table-responsive">
-						<table class="table table-sm table-hover mb-0">
-							<thead class="table-light">
-								<tr>
-									<th>Time</th>
-									<th>Event</th>
-									<th>Source</th>
-									<th class="text-end">Status</th>
-								</tr>
-							</thead>
-							<tbody>
-								{% for ev in operations %}
-								<tr>
-									<td class="small text-muted">{{ ev.timestamp|date:'SHORT_DATETIME_FORMAT' }}</td>
-									<td>{{ ev.description }}</td>
-									<td class="small text-muted">{{ ev.source|default:'System' }}</td>
-									<td class="text-end">
-										{% if ev.level == 'error' %}<span class="badge bg-danger">Error</span>
-										{% elif ev.level == 'warning' %}<span class="badge bg-warning text-dark">Warning</span>
-										{% else %}<span class="badge bg-success">OK</span>{% endif %}
-									</td>
-								</tr>
-								{% empty %}
-								<tr><td colspan="4" class="text-center text-muted py-3">No operations to show.</td></tr>
-								{% endfor %}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="col-lg-4">
-			<div class="card mb-3">
-				<div class="card-body">
-					<h5 class="card-title">Quick Actions</h5>
-					<div class="d-grid gap-2">
-						<a href="/opadmin/new-appointment/" class="btn btn-primary btn-sm">New Appointment</a>
-						<a href="/opadmin/admit-patient/" class="btn btn-outline-primary btn-sm">Admit Patient</a>
-						<a href="/opadmin/lab/" class="btn btn-outline-success btn-sm">Open Lab Queue</a>
-						<a href="/opadmin/messages/" class="btn btn-outline-info btn-sm">View Messages</a>
-					</div>
-				</div>
-			</div>
-
-			<div class="card">
-				<div class="card-body">
-					<h6 class="card-title">Activity Summary</h6>
-					<canvas id="opChart" height="180"></canvas>
-				</div>
-			</div>
-		</div>
-	</div>
-
+        <div class="col-xl-4 d-grid gap-4">
+            <div class="card-modern">
+                <div class="card-header">
+                    <div class="brand-font">Care summary</div>
+                    <div class="muted-small">Snapshot of team coverage.</div>
+                </div>
+                <div class="card-body d-grid gap-3">
+                    {% for item in care_summary %}
+                    <div class="insight-card">
+                        <div class="muted-small text-uppercase fw-bold">{{ item.label }}</div>
+                        <div class="insight-value">{{ item.value }}</div>
+                        <div class="muted-small">{{ item.meta }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card-modern">
+                <div class="card-header">
+                    <div class="brand-font">Quick actions</div>
+                    <div class="muted-small">Common team-management entry points.</div>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'doctoradd' %}" class="btn btn-rich primary"><i class="bi bi-plus-circle"></i> Add doctor</a>
+                    <a href="{% url 'helperadd' %}" class="btn btn-outline-secondary">Add helper</a>
+                    <a href="{% url 'receptionistadd' %}" class="btn btn-outline-secondary">Add receptionist</a>
+                    <a href="{% url 'OAprofile' %}" class="btn btn-outline-secondary">Update profile</a>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-{{ chart_labels|json_script:"labels-data" }}
-{{ chart_data|json_script:"chart-data" }}
-
+{{ chart_labels|json_script:'labels-data' }}
+{{ chart_data|json_script:'chart-data' }}
 <script>
-(function(){
-    const ctx = document.getElementById('opChart');
-    if (!ctx) return;
-
+(function () {
+    const canvas = document.getElementById('opChart');
+    if (!canvas || typeof Chart === 'undefined') return;
+    const ctx = canvas.getContext('2d');
     const labels = JSON.parse(document.getElementById('labels-data').textContent);
     const data = JSON.parse(document.getElementById('chart-data').textContent);
+    const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+    gradient.addColorStop(0, 'rgba(20, 184, 166, 0.85)');
+    gradient.addColorStop(1, 'rgba(249, 115, 22, 0.2)');
 
     new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Events',
                 data: data,
-                backgroundColor: 'rgba(13,110,253,0.7)'
+                borderColor: '#0f766e',
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointBackgroundColor: '#f97316'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } }
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
         }
     });
 })();
 </script>
-
 {% endblock %}

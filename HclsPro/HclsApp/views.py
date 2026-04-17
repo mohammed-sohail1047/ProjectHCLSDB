@@ -1,11 +1,22 @@
 from django.shortcuts import redirect, render
-from HclsWebApi.models import CheckLogin, PasswordResetToken, AdminLogin, AdminType
+from HclsWebApi.models import (
+    CheckLogin,
+    PasswordResetToken,
+    AdminLogin,
+    AdminType,
+    Patient,
+    Doctor,
+    Employee,
+    Department,
+    Receptionist,
+    Helper,
+)
 from django.contrib import messages
 from .decorators import login_required, mAdmin_only, opAdmin_only, already_authenticated, normalize_admin_type
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
-import uuid
+from datetime import timedelta
 from .repositories.django_admin_repository import DjangoAdminRepository
 # from .decorators import login_required, already_authenticated, mAdmin_only, opAdmin_only
 
@@ -199,10 +210,9 @@ def activate_admin(request, id):
 
 @mAdmin_only
 def dashboard(request):
-    # Dashboard overview - include OpAdmin statistics and list
-    admins = CheckLogin.objects.all()
+    admins = CheckLogin.objects.select_related('created_by').all()
+    today = timezone.localdate()
 
-    # Only show Operational Admins created by the currently-logged-in MAdmin
     current_admin_id = request.session.get('admin_id')
     opadmins = []
     active_count = 0
@@ -232,15 +242,73 @@ def dashboard(request):
                 'status': 'Active' if a.status else 'Inactive',
             })
 
+    patient_count = Patient.objects.count()
+    doctor_count = Doctor.objects.count()
+    department_count = Department.objects.count()
+    staff_count = Employee.objects.count() + Receptionist.objects.count() + Helper.objects.count()
+    appointments_count = Patient.objects.filter(EntryDateandTime__date=today).count()
+    admitted_count = Patient.objects.filter(IsAdmitted=True).count()
+    discharged_count = Patient.objects.exclude(ExitDateandTime__isnull=True).count()
+    total_opadmins = active_count + inactive_count
+    activation_rate = round((active_count / total_opadmins) * 100) if total_opadmins else 0
+
+    recent_patients = list(
+        Patient.objects.select_related('DoctorID')
+        .order_by('-EntryDateandTime')[:4]
+    )
+    recent_admins = CheckLogin.objects.filter(created_by_id=current_admin_id).order_by('-created_on')[:5]
+
+    activity_feed = []
+    for patient in recent_patients:
+        activity_feed.append({
+            'title': patient.Pname,
+            'subtitle': f"Assigned to Dr. {patient.DoctorID.Dname}",
+            'time': patient.EntryDateandTime,
+            'state': 'Admitted' if patient.IsAdmitted else 'Checked in',
+        })
+    for admin in recent_admins:
+        activity_feed.append({
+            'title': admin.username or admin.email,
+            'subtitle': 'Operational admin onboarded',
+            'time': admin.created_on,
+            'state': 'Active' if admin.status else 'Pending activation',
+        })
+    activity_feed = sorted(activity_feed, key=lambda item: item['time'], reverse=True)[:6]
+
     context = {
-        'patients_count': 0,
-        'doctors_count': 0,
-        'appointments_count': 0,
-        'staff_count': 0,
-        'recent_activities': [],
+        'patients_count': patient_count,
+        'doctors_count': doctor_count,
+        'appointments_count': appointments_count,
+        'staff_count': staff_count,
+        'department_count': department_count,
+        'admitted_count': admitted_count,
+        'discharged_count': discharged_count,
+        'activation_rate': activation_rate,
+        'recent_activities': activity_feed,
         'opadmins': opadmins,
         'opadmin_active_count': active_count,
         'opadmin_inactive_count': inactive_count,
+        'total_opadmins': total_opadmins,
+        'focus_cards': [
+            {
+                'label': 'Capacity',
+                'value': f'{admitted_count} admitted',
+                'meta': f'{discharged_count} discharged',
+                'tone': 'success',
+            },
+            {
+                'label': 'Admin activation',
+                'value': f'{activation_rate}%',
+                'meta': f'{inactive_count} still pending',
+                'tone': 'warning',
+            },
+            {
+                'label': 'Departments',
+                'value': department_count,
+                'meta': f'{doctor_count} doctors mapped',
+                'tone': 'info',
+            },
+        ],
     }
 
     return render(request, "Admin/MAdmin/dashboard.html", context)
@@ -398,21 +466,110 @@ def manage(request):
 @login_required
 @mAdmin_only
 def edit(request, id):
-    """Placeholder edit view for Manage table rows. Currently redirects back to manage.
-    Implement full edit form later if needed."""
+    """Edit view for Manage table rows."""
     try:
         admin = CheckLogin.objects.get(id=id)
     except CheckLogin.DoesNotExist:
         messages.error(request, 'Record not found.')
         return redirect('manage')
 
-    # For now, redirect to manage; a full edit form can be implemented later.
-    messages.info(request, f'Edit feature is not implemented yet for ID {id}.')
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        phone = request.POST.get('phone')
+        status = request.POST.get('status') == 'on'
+
+        if email and email != admin.email and CheckLogin.objects.filter(email=email).exclude(id=id).exists():
+            messages.error(request, 'Email already in use.')
+        elif username and username != admin.username and CheckLogin.objects.filter(username=username).exclude(id=id).exists():
+            messages.error(request, 'Username already in use.')
+        else:
+            admin.email = email
+            admin.username = username
+            admin.phone = phone
+            admin.status = status
+            admin.save()
+            messages.success(request, 'Admin updated successfully.')
+            return redirect('manage')
+
+    return render(request, 'Admin/MAdmin/edit.html', {'admin': admin})
+
+@login_required
+@mAdmin_only
+def delete_admin(request, id):
+    if request.method == 'POST':
+        try:
+            admin = CheckLogin.objects.get(id=id)
+            admin.delete()
+            # Note: The database should ideally cascade delete AdminLogin, etc.
+            messages.success(request, 'Admin deleted successfully.')
+        except CheckLogin.DoesNotExist:
+            messages.error(request, 'Record not found.')
+    return redirect('manage')
+
+@login_required
+@mAdmin_only
+def bulk_delete_admins(request):
+    if request.method == 'POST':
+        admin_ids = request.POST.getlist('admin_ids')
+        if admin_ids:
+            # Delete multiple admins
+            deleted_count, _ = CheckLogin.objects.filter(id__in=admin_ids).delete()
+            messages.success(request, f'Successfully deleted {deleted_count} record(s).')
+        else:
+            messages.warning(request, 'No records selected for deletion.')
     return redirect('manage')
 
 @opAdmin_only
 def OAdashboard(request):
-    return render(request, "Admin/OpAdmin/dashboard.html")
+    today = timezone.localdate()
+    appointments_today = Patient.objects.filter(EntryDateandTime__date=today).count()
+    admissions_pending = Patient.objects.filter(IsAdmitted=True, ExitDateandTime__isnull=True).count()
+    lab_results_pending = max(Patient.objects.filter(IsAdmitted=True).count() - Patient.objects.exclude(Medication='').count(), 0)
+    unread_messages = CheckLogin.objects.filter(status=False, created_by_id=request.session.get('admin_id')).count()
+
+    recent_patients = Patient.objects.select_related('DoctorID').order_by('-EntryDateandTime')[:6]
+    operations = []
+    for patient in recent_patients:
+        operations.append({
+            'timestamp': patient.EntryDateandTime,
+            'description': f'{patient.Pname} routed to {patient.DoctorID.Dname}',
+            'source': 'Patient desk',
+            'level': 'warning' if patient.IsAdmitted else 'info',
+        })
+
+    recent_opadmins = CheckLogin.objects.filter(created_by_id=request.session.get('admin_id')).order_by('-created_on')[:3]
+    for admin in recent_opadmins:
+        operations.append({
+            'timestamp': admin.created_on,
+            'description': f'{admin.username or admin.email} account reviewed',
+            'source': 'Admin queue',
+            'level': 'info' if admin.status else 'warning',
+        })
+    operations = sorted(operations, key=lambda item: item['timestamp'], reverse=True)[:7]
+
+    chart_labels = []
+    chart_data = []
+    for offset in range(6, -1, -1):
+        day = today - timedelta(days=offset)
+        chart_labels.append(day.strftime('%a'))
+        chart_data.append(Patient.objects.filter(EntryDateandTime__date=day).count())
+
+    context = {
+        'appointments_today': appointments_today,
+        'admissions_pending': admissions_pending,
+        'lab_results_pending': lab_results_pending,
+        'unread_messages': unread_messages,
+        'operations': operations,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+        'care_summary': [
+            {'label': 'Doctors available', 'value': Doctor.objects.count(), 'meta': 'Across all specialities'},
+            {'label': 'Front desk staff', 'value': Receptionist.objects.count(), 'meta': 'Reception coverage'},
+            {'label': 'Support helpers', 'value': Helper.objects.count(), 'meta': 'Ward assistance'},
+        ],
+    }
+    return render(request, "Admin/OpAdmin/dashboard.html", context)
 
 @opAdmin_only
 def OAprofile(request):

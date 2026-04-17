@@ -16,8 +16,12 @@ class DjangoAdminRepository(BaseAdminRepository):
             phone=phone,
             admin_type=admin_type,
             created_by=created_by,
-            created_at=created_at
         )
+        # `CheckLogin` uses `created_on`, not `created_at`.
+        # Keep the repository signature stable, but only backfill when a value is explicitly provided.
+        if created_at is not None:
+            CheckLogin.objects.filter(pk=chk.pk).update(created_on=created_at)
+            chk.refresh_from_db(fields=['created_on'])
         return chk
 
     def create_adminlogin_from_check(self, checklogin):

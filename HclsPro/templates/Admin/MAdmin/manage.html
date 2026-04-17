@@ -1,113 +1,137 @@
 {% extends 'Admin/MAdmin/mabase.html' %}
 
+{% block page_title %}Manage Admins{% endblock %}
+
 {% block content %}
+<div class="d-grid gap-4">
+    {% csrf_token %}
 
-<div class="container-fluid py-3">
-    <div class="row mb-3 align-items-center">
-        <div class="col">
-            <h2 class="mb-0">Manage</h2>
-            <small class="text-muted">Browse and manage records</small>
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div class="col-auto">
-            <a href="{% url 'add' %}" class="btn btn-primary">Add New</a>
-        </div>
+        {% endfor %}
     </div>
+    {% endif %}
 
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <input id="globalSearch" class="form-control" placeholder="Search by name, email or ID">
-                </div>
-                <div class="col-md-3">
-                    <select id="filterRole" class="form-select">
-                        <option value="">All Roles</option>
-                        <option value="MAdmin">Managerial Admin</option>
-                        <option value="OpAdmin">Operational Admin</option>
-                        <option value="patient">Patient</option>
-                        <option value="doctor">Doctor</option>
-                        <option value="staff">Staff</option>
-                    </select>
-                </div>
-                <div class="col-md-5 text-end">
-                    <div class="d-flex justify-content-end gap-2">
-                        <div class="btn-group" role="group" aria-label="scope toggle">
-                            <a href="?scope=my" class="btn {% if scope != 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">My OpAdmins</a>
-                            <a href="?scope=all" class="btn {% if scope == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
-                        </div>
-                        <div class="btn-group" role="group">
-                            <button id="bulkDelete" class="btn btn-outline-danger" disabled>Delete Selected</button>
-                            <button id="exportCsv" class="btn btn-outline-secondary">Export CSV</button>
-                            <button id="refreshBtn" class="btn btn-outline-primary">Refresh</button>
-                        </div>
+    <section class="page-hero hero-grid">
+        <div>
+            <div class="hero-eyebrow"><i class="bi bi-kanban"></i> Management board</div>
+            <h2 class="mt-3 mb-2">Review, filter, and clean up your operational admin pipeline.</h2>
+            <p class="mb-0 text-white-50">This board keeps bulk actions, exports, and ownership visibility in one place.</p>
+        </div>
+        <div class="dashboard-panel bg-white bg-opacity-10 border border-white border-opacity-10 text-white">
+            <div class="small text-uppercase text-white-50">Current scope</div>
+            <div class="brand-font fs-3">{% if scope == 'all' %}All OpAdmins{% else %}My OpAdmins{% endif %}</div>
+            <div class="muted-small text-white-50">{{ page_obj.paginator.count|default:0 }} records currently visible.</div>
+        </div>
+    </section>
+
+    <section class="management-toolbar">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-4">
+                <label class="form-label muted-small">Search records</label>
+                <input id="globalSearch" class="form-control" placeholder="Search by name, email, phone, or ID">
+            </div>
+            <div class="col-lg-2">
+                <label class="form-label muted-small">Role filter</label>
+                <select id="filterRole" class="form-select">
+                    <option value="">All roles</option>
+                    <option value="OpAdmin">Operational Admin</option>
+                </select>
+            </div>
+            <div class="col-lg-6">
+                <div class="d-flex flex-wrap justify-content-lg-end gap-2">
+                    <div class="btn-group" role="group">
+                        <a href="?scope=my" class="btn {% if scope != 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">My scope</a>
+                        <a href="?scope=all" class="btn {% if scope == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All scope</a>
                     </div>
+                    <button id="bulkDelete" class="btn btn-outline-danger" disabled>Delete selected</button>
+                    <button id="exportCsv" class="btn btn-outline-secondary">Export CSV</button>
+                    <a href="{% url 'add' %}" class="btn btn-rich primary">New admin</a>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="card mb-4">
-        <div class="table-responsive">
-            <table class="table table-hover table-sm mb-0" id="manageTable">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width:36px;"><input type="checkbox" id="selectAll"></th>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Role</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Created By</th>
-                        <th>Created On</th>
-                        <th>Status</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in items %}
-                    <tr data-role="{{ item.role }}">
-                        <td><input type="checkbox" class="rowSelect" value="{{ item.id }}"></td>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.role }}</td>
-                        <td>{{ item.email }}</td>
-                        <td>{{ item.phone|default:'—' }}</td>
-                        <td>{{ item.created_by }}</td>
-                        <td>{{ item.created_on|date:'SHORT_DATETIME_FORMAT' }}</td>
-                        <td>{{ item.status }}</td>
-                        <td class="text-end">
-                            <a href="{% url 'edit' item.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                            <button data-id="{{ item.id }}" class="btn btn-sm btn-outline-danger btn-delete">Delete</button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="10" class="text-center text-muted py-4">No records found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <section class="card-modern">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <div class="brand-font">Operational admins</div>
+                <div class="muted-small">Use the table for quick edits, export, and deletion workflows.</div>
+            </div>
+            <span class="workspace-chip"><i class="bi bi-database"></i> {{ page_obj.paginator.count|default:0 }} records</span>
         </div>
-    </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-modern align-middle mb-0" id="manageTable">
+                    <thead>
+                        <tr>
+                            <th style="width:36px;"><input type="checkbox" id="selectAll"></th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Created By</th>
+                            <th>Created On</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr data-role="{{ item.role }}">
+                            <td><input type="checkbox" class="rowSelect" value="{{ item.id }}"></td>
+                            <td>#{{ item.id }}</td>
+                            <td>
+                                <div class="fw-semibold">{{ item.name }}</div>
+                                <div class="muted-small">{{ item.email }}</div>
+                            </td>
+                            <td>{{ item.role }}</td>
+                            <td>{{ item.email }}</td>
+                            <td>{{ item.phone|default:'-' }}</td>
+                            <td>{{ item.created_by }}</td>
+                            <td>{{ item.created_on|date:'M d, Y h:i A' }}</td>
+                            <td>
+                                <span class="status-badge {% if item.status == 'Active' %}success{% else %}warning{% endif %}">{{ item.status }}</span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'edit' item.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                <button data-id="{{ item.id }}" class="btn btn-sm btn-outline-danger btn-delete">Delete</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center text-muted py-4">No records found for this scope.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
 
-    <!-- Operational Admins Section -->
-    <!-- Operational Admins are shown in the main table (only OpAdmins are displayed) -->
-
-    <nav class="mt-3" aria-label="Page navigation">
-        {% if page_obj %}
-            <ul class="pagination justify-content-end">
-                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&scope={{ scope }}">Previous</a></li>{% endif %}
-                <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&scope={{ scope }}">Next</a></li>{% endif %}
-            </ul>
-        {% endif %}
+    {% if page_obj %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-end mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&scope={{ scope }}">Previous</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&scope={{ scope }}">Next</a></li>
+            {% endif %}
+        </ul>
     </nav>
-
+    {% endif %}
 </div>
 
 <script>
-// Simple client-side helpers: search, filter, select all, bulk delete confirmation, export CSV
-(function(){
+(function () {
     const table = document.getElementById('manageTable');
     const search = document.getElementById('globalSearch');
     const filter = document.getElementById('filterRole');
@@ -115,89 +139,112 @@
     const bulkDelete = document.getElementById('bulkDelete');
     const exportCsv = document.getElementById('exportCsv');
 
-    function rows(){ return Array.from(table.querySelectorAll('tbody tr')).filter(r=>!r.classList.contains('d-none')); }
-
-    function updateBulkState(){
-        const any = table.querySelectorAll('tbody input.rowSelect:checked').length>0;
-        bulkDelete.disabled = !any;
+    function visibleRows() {
+        return Array.from(table.querySelectorAll('tbody tr')).filter(function (row) {
+            return row.style.display !== 'none';
+        });
     }
 
-    if (selectAll){
-        selectAll.addEventListener('change', ()=>{
-            table.querySelectorAll('tbody input.rowSelect').forEach(cb=>cb.checked = selectAll.checked);
+    function updateBulkState() {
+        bulkDelete.disabled = table.querySelectorAll('tbody input.rowSelect:checked').length === 0;
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            table.querySelectorAll('tbody input.rowSelect').forEach(function (checkbox) {
+                checkbox.checked = selectAll.checked;
+            });
             updateBulkState();
         });
     }
 
-    table.addEventListener('change', (e)=>{ if (e.target && e.target.classList.contains('rowSelect')) updateBulkState(); });
+    table.addEventListener('change', function (event) {
+        if (event.target.classList.contains('rowSelect')) updateBulkState();
+    });
 
-    if (search){
-        search.addEventListener('input', ()=>{
-            const q = search.value.toLowerCase();
-            table.querySelectorAll('tbody tr').forEach(tr=>{
-                const txt = tr.textContent.toLowerCase();
-                tr.style.display = txt.includes(q) ? '' : 'none';
+    if (search) {
+        search.addEventListener('input', function () {
+            const query = search.value.toLowerCase();
+            table.querySelectorAll('tbody tr').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
             });
         });
     }
 
-    if (filter){
-        filter.addEventListener('change', ()=>{
-            const val = filter.value;
-            table.querySelectorAll('tbody tr').forEach(tr=>{
-                if (!val) tr.style.display=''; else tr.style.display = (tr.getAttribute('data-role')===val) ? '' : 'none';
+    if (filter) {
+        filter.addEventListener('change', function () {
+            const value = filter.value;
+            table.querySelectorAll('tbody tr').forEach(function (row) {
+                row.style.display = !value || row.getAttribute('data-role') === value ? '' : 'none';
             });
         });
     }
 
-    if (bulkDelete){
-        bulkDelete.addEventListener('click', ()=>{
-            const ids = Array.from(table.querySelectorAll('tbody input.rowSelect:checked')).map(i=>i.value);
-            if (!ids.length) return;
-            if (!confirm('Delete selected records? This cannot be undone.')) return;
-            // send to server (example): POST /manage/bulk-delete/ with JSON body
-            console.log('Would delete', ids);
+    if (bulkDelete) {
+        bulkDelete.addEventListener('click', function () {
+            const ids = Array.from(table.querySelectorAll('tbody input.rowSelect:checked')).map(function (input) {
+                return input.value;
+            });
+            if (!ids.length || !confirm('Delete selected records?')) return;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/bulk_delete_admins/';
+            form.innerHTML = '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">';
+            ids.forEach(function (id) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'admin_ids';
+                input.value = id;
+                form.appendChild(input);
+            });
+            document.body.appendChild(form);
+            form.submit();
         });
     }
 
-    if (exportCsv){
-        exportCsv.addEventListener('click', ()=>{
-            // Export main table (ID, Name, Role, Email, Phone, CreatedBy, CreatedOn, Status)
-            const rows = Array.from(table.querySelectorAll('tbody tr')).filter(r=>r.style.display!=='none' && !r.classList.contains('d-none'));
-            const cols = ['ID','Name','Role','Email','Phone','CreatedBy','CreatedOn','Status'];
-            const data = [cols.join(',')].concat(rows.map(r=>{
-                const cells = r.querySelectorAll('td');
-                return [cells[1].innerText,cells[2].innerText,cells[3].innerText,cells[4].innerText,cells[5].innerText,cells[6].innerText,cells[7].innerText,cells[8].innerText].map(v=>`"${v.replace(/"/g,'""')}"`).join(',');
-            }));
-            const blob = new Blob([data.join('\n')], {type:'text/csv'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'opadmins_export.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    if (exportCsv) {
+        exportCsv.addEventListener('click', function () {
+            const data = [['ID', 'Name', 'Role', 'Email', 'Phone', 'Created By', 'Created On', 'Status']];
+            visibleRows().forEach(function (row) {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 10) return;
+                data.push([
+                    cells[1].innerText,
+                    cells[2].innerText.replace(/\n/g, ' '),
+                    cells[3].innerText,
+                    cells[4].innerText,
+                    cells[5].innerText,
+                    cells[6].innerText,
+                    cells[7].innerText,
+                    cells[8].innerText
+                ]);
+            });
+            const csv = data.map(function (line) {
+                return line.map(function (cell) {
+                    return '"' + cell.replace(/"/g, '""') + '"';
+                }).join(',');
+            }).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'opadmins_export.csv';
+            link.click();
+            URL.revokeObjectURL(link.href);
         });
     }
 
-    // Export Operational Admins CSV
-    const exportOpCsv = document.getElementById('exportOpCsv');
-    if (exportOpCsv){
-        exportOpCsv.addEventListener('click', ()=>{
-            const rows = Array.from(document.querySelectorAll('#opAdminTable tbody tr')).filter(r=>r.style.display!=='none');
-            const cols = ['ID','Created By','Created On','Status'];
-            const data = [cols.join(',')].concat(rows.map(r=>{
-                const cells = r.querySelectorAll('td');
-                return [cells[0].innerText,cells[1].innerText,cells[2].innerText,cells[3].innerText].map(v=>`"${v.replace(/"/g,'""')}"`).join(',');
-            }));
-            const blob = new Blob([data.join('\n')], {type:'text/csv'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'opadmins.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    document.querySelectorAll('.btn-delete').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const id = button.getAttribute('data-id');
+            if (!confirm('Delete record #' + id + '?')) return;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/delete_admin/' + id + '/';
+            form.innerHTML = '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">';
+            document.body.appendChild(form);
+            form.submit();
         });
-    }
-
-    // attach single-row delete buttons
-    document.querySelectorAll('.btn-delete').forEach(btn=>btn.addEventListener('click', ()=>{
-        const id = btn.getAttribute('data-id');
-        if (!confirm('Delete record #' + id + '?')) return;
-        console.log('Would delete', id);
-    }));
+    });
 })();
 </script>
-
 {% endblock %}
